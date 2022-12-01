@@ -27,10 +27,10 @@ jobs:
       run: go test -v ./...
 
     - name: Build Windows
-      run: GOOS=windows GOARCH=amd64 go build -v -o timefiller-win64
+      run: GOOS=windows GOARCH=amd64 go build -o timefiller-win64
       
     - name: Build Mac
-      run: GOOS=mac GOARCH=arm64 go build -v ./... -o timefiller-macm1
+      run: GOOS=mac GOARCH=arm64 go build -o timefiller-macm1
       
     - uses: ncipollo/release-action@v1
       with:
