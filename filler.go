@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"math/rand"
 	"os"
 	"path/filepath"
 	"strings"
@@ -24,6 +25,21 @@ const (
 	StartLocationClockOutHour = "D%d"
 	LocationExcuse            = "G%d"
 )
+
+var BasePrefix = [...]string{"בעיקר", "דברים שונים אבל בעיקר"}
+var BaseExcuses = [...]string{"פיתוח", "בדיקות", "בדיקת באג דחוף", "אפיון", "אפיון פיצ׳ר", "פיתוח פיצ׳ר"}
+
+func GenerateExcuse(cellIndex int) string {
+	excuseIndex := rand.Intn(len(BaseExcuses))
+
+	if cellIndex%10 == 0 {
+		prefixIndex := rand.Intn(len(BasePrefix))
+
+		return fmt.Sprintf("%s %s", BasePrefix[prefixIndex], BaseExcuses[excuseIndex])
+	}
+
+	return BaseExcuses[excuseIndex]
+}
 
 func IsApplicableDay(dayValue string) (bool, error) {
 	date, parseErr := time.Parse("01-02-06", dayValue)
@@ -84,7 +100,7 @@ func FillFile(path string, config *Config) (*excelize.File, error) {
 
 		file.SetCellValue(sheetName, clockInHour, "9:00")
 		file.SetCellValue(sheetName, clockOutHour, "18:30")
-		file.SetCellValue(sheetName, excuse, "עבודת פיתוח או משהו לא יודע")
+		file.SetCellValue(sheetName, excuse, GenerateExcuse(i))
 	}
 
 	fileExt := filepath.Ext(path)
