@@ -26,7 +26,7 @@ const (
 	LocationExcuse            = "G%d"
 )
 
-var BasePrefix = [...]string{"בעיקר", "דברים שונים אבל בעיקר"}
+var BasePrefix = [...]string{"בעיקר", "דברים שונים אבל בעיקר", "דברים שונים +", "שונות +"}
 var BaseExcuses = [...]string{"פיתוח", "בדיקות", "בדיקת באג דחוף", "אפיון", "אפיון פיצ׳ר", "פיתוח פיצ׳ר"}
 
 func GenerateExcuse(cellIndex int) string {
@@ -64,7 +64,7 @@ func FillFile(path string, config *Config) (*excelize.File, error) {
 	defer file.Close()
 
 	currentDate := time.Now()
-	month := int(currentDate.Month())
+	month := int(currentDate.Month()) - 1
 	if month == 0 {
 		// Got January so roll it back to 1
 		month = 1
@@ -72,7 +72,7 @@ func FillFile(path string, config *Config) (*excelize.File, error) {
 
 	sheetName := file.GetSheetName(file.GetActiveSheetIndex())
 	file.SetCellValue(sheetName, LocationYear, currentDate.Year())
-	file.SetCellValue(sheetName, LocationMonth, int(currentDate.Month()))
+	file.SetCellValue(sheetName, LocationMonth, month)
 
 	file.SetCellValue(sheetName, LocationEmployeeName, config.EmployeeName)
 
