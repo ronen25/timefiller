@@ -19,27 +19,19 @@ const (
 
 	StartLocationLine         = 8
 	EndLocationLine           = 37
+	LocationDay               = "B%d"
 	StartLocationClockInHour  = "C%d"
 	StartLocationClockOutHour = "D%d"
 	LocationExcuse            = "G%d"
 )
 
-func CopyFileToPath(originalPath, suffix string) (string, error) {
-	input, err := os.ReadFile(originalPath)
-	if err != nil {
-		return "", err
+func IsApplicableDay(dayValue string) (bool, error) {
+	date, parseErr := time.Parse("01-02-06", dayValue)
+	if parseErr != nil {
+		return false, parseErr
 	}
 
-	fileExt := filepath.Ext(originalPath)
-	fileBase := strings.TrimSuffix(originalPath, fileExt)
-	copyPath := fmt.Sprintf("%s_%s.%s", fileBase, suffix, originalPath)
-
-	err = os.WriteFile(copyPath, input, 0644)
-	if err != nil {
-		return "", nil
-	}
-
-	return copyPath, nil
+	return date.Weekday() != time.Friday && date.Weekday() != time.Saturday, nil
 }
 
 func FillFile(path string, config *Config) (*excelize.File, error) {
@@ -54,14 +46,36 @@ func FillFile(path string, config *Config) (*excelize.File, error) {
 	}
 
 	currentDate := time.Now()
+	month := int(currentDate.Month())
+	if month == 0 {
+		// Got January so roll it back to 1
+		month = 1
+	}
 
 	sheetName := file.GetSheetName(file.GetActiveSheetIndex())
 	file.SetCellValue(sheetName, LocationYear, currentDate.Year())
-	file.SetCellValue(sheetName, LocationMonth, currentDate.Month())
+	file.SetCellValue(sheetName, LocationMonth, int(currentDate.Month()))
 
 	file.SetCellValue(sheetName, LocationEmployeeName, config.EmployeeName)
 
 	for i := StartLocationLine; i <= EndLocationLine; i++ {
+		// Check if the day is a friday or a saturday, if it is, skip it.
+		cellDate := fmt.Sprintf(LocationDay, i)
+		dateRaw, dateErr := file.GetCellValue(sheetName, cellDate)
+		if dateErr != nil {
+			return nil, dateErr
+		}
+
+		isApplicable, parseErr := IsApplicableDay(dateRaw)
+		if parseErr != nil {
+			return nil, parseErr
+		}
+
+		// Skip weekdays
+		if !isApplicable {
+			continue
+		}
+
 		clockInHour := fmt.Sprintf(StartLocationClockInHour, i)
 		clockOutHour := fmt.Sprintf(StartLocationClockOutHour, i)
 		excuse := fmt.Sprintf(LocationExcuse, i)
@@ -73,7 +87,8 @@ func FillFile(path string, config *Config) (*excelize.File, error) {
 
 	fileExt := filepath.Ext(path)
 	fileBase := strings.TrimSuffix(path, fileExt)
-	copyPath := fmt.Sprintf("%s_%s.%s", fileBase, "filled", path)
+	copyPath := fmt.Sprintf("%s_%s_%d_%d.xlsx", fileBase, config.EmployeeName,
+		month, currentDate.Year())
 	err = file.SaveAs(copyPath)
 	if err != nil {
 		return nil, err
