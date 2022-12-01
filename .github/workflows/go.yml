@@ -34,5 +34,6 @@ jobs:
       
     - uses: ncipollo/release-action@v1
       with:
-        artifacts: "timefiller*"
+        artifacts: "timefiller-*"
         body: "TEST"
+        name: $(git rev-parse --short "$GITHUB_SHA")
