@@ -30,7 +30,7 @@ jobs:
       run: GOOS=windows GOARCH=amd64 go build -o timefiller-win64
       
     - name: Build Mac
-      run: GOOS=mac GOARCH=arm64 go build -o timefiller-macm1
+      run: GOOS=darwin GOARCH=arm64 go build -o timefiller-darwinm1
       
     - uses: ncipollo/release-action@v1
       with:
