@@ -21,11 +21,10 @@ func main() {
 		log.Fatalf("Error loading config: %s\n", configErr)
 	}
 
-	file, err := FillFile(originalFilePath, &config)
+	_, err := FillFile(originalFilePath, &config)
 	if err != nil {
 		log.Fatalf("Error filling XLSX file '%s': %s", originalFilePath, err)
 	}
-	defer file.Close()
 
 	log.Println("Done.")
 }

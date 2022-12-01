@@ -39,11 +39,13 @@ func FillFile(path string, config *Config) (*excelize.File, error) {
 	if err != nil {
 		return nil, err
 	}
+	defer rawFile.Close()
 
 	file, err := excelize.OpenReader(rawFile)
 	if err != nil {
 		return nil, err
 	}
+	defer file.Close()
 
 	currentDate := time.Now()
 	month := int(currentDate.Month())
