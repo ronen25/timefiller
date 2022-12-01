@@ -89,7 +89,6 @@ func FillFile(path string, config *Config) (*excelize.File, error) {
 			return nil, parseErr
 		}
 
-		// Skip weekdays
 		if !isApplicable {
 			continue
 		}
