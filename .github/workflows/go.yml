@@ -32,8 +32,7 @@ jobs:
     - name: Build Mac
       run: GOOS=darwin GOARCH=arm64 go build -o timefiller-darwinm1
       
-    - uses: ncipollo/release-action@v1
+    - name: Release
+      uses: softprops/action-gh-release@v1
       with:
-        artifacts: "timefiller-*"
-        body: "TEST"
-        name: $(git rev-parse --short "$GITHUB_SHA")
+        files: timefiller-win64,timefiller-darwinm1
